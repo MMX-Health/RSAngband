@@ -2756,6 +2756,8 @@ static void design_artifact(struct artifact_set_data *data, int tv, int *aidx)
 	int art_level = art->level;
 	int tries;
 	int alloc_new;
+	int alloc_power;
+	int unboosted_power;
 	int ap = 0;
 	bool hurt_me = false;
 
@@ -2799,6 +2801,14 @@ static void design_artifact(struct artifact_set_data *data, int tv, int *aidx)
 		hurt_me = true;
 		power = -power;
 	}
+
+	/*
+	 * Boost the target power by 10% to compensate for randarts not being
+	 * hand-designed, keeping the unboosted value for rarity and depth.
+	 */
+	unboosted_power = power;
+	power = (power * 11) / 10;
+	file_putf(log_file, "Boosted target power to %d\n", power);
 
 	/* Choose a base item typen not too powerful, so we'll have to add to it. */
 	for (tries = 0; tries < MAX_TRIES; tries++) {
@@ -2897,8 +2907,14 @@ static void design_artifact(struct artifact_set_data *data, int tv, int *aidx)
 	mem_free(a_old->curses);
 	mem_free(a_old);
 
+	/*
+	 * Scale the 10% power boost back out so rarity and depth stay the
+	 * same as they would be for an unboosted artifact.
+	 */
+	alloc_power = MAX(1, (ap * 10) / 11);
+
 	/* Set rarity based on power */
-	alloc_new = 4000000 / (ap * ap);
+	alloc_new = 4000000 / (alloc_power * alloc_power);
 	alloc_new /= (kind->alloc_prob ? kind->alloc_prob : 20);
 	if (alloc_new > 99) alloc_new = 99;
 	if (alloc_new < 1) alloc_new = 1;
@@ -2906,14 +2922,14 @@ static void design_artifact(struct artifact_set_data *data, int tv, int *aidx)
 
 
 	/* Set depth according to power */
-	art->alloc_max = MIN(127, (ap * 3) / 5);
-	art->alloc_min = MIN(100, ((ap + 100) * 100 / data->max_power));
+	art->alloc_max = MIN(127, (alloc_power * 3) / 5);
+	art->alloc_min = MIN(100, ((alloc_power + 100) * 100 / data->max_power));
 
 	/* Have a chance to be less rare or deep, more likely the less power */
-	if (one_in_(5 + (power / 20))) {
+	if (one_in_(5 + (unboosted_power / 20))) {
 		art->alloc_prob += randint1(20);
 		if (art->alloc_prob > 99) art->alloc_prob = 99;
-	} else if (one_in_(5 + (power / 20))) {
+	} else if (one_in_(5 + (unboosted_power / 20))) {
 		art->alloc_min /= 2;
 		if (art->alloc_min < 1) art->alloc_min = 1;
 	}
