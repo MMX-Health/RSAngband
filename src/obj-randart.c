@@ -2803,11 +2803,11 @@ static void design_artifact(struct artifact_set_data *data, int tv, int *aidx)
 	}
 
 	/*
-	 * Boost the target power by 10% to compensate for randarts not being
+	 * Boost the target power by 15% to compensate for randarts not being
 	 * hand-designed, keeping the unboosted value for rarity and depth.
 	 */
 	unboosted_power = power;
-	power = (power * 11) / 10;
+	power = (power * 23) / 20;
 	file_putf(log_file, "Boosted target power to %d\n", power);
 
 	/* Choose a base item typen not too powerful, so we'll have to add to it. */
@@ -2908,10 +2908,10 @@ static void design_artifact(struct artifact_set_data *data, int tv, int *aidx)
 	mem_free(a_old);
 
 	/*
-	 * Scale the 10% power boost back out so rarity and depth stay the
+	 * Scale the 15% power boost back out so rarity and depth stay the
 	 * same as they would be for an unboosted artifact.
 	 */
-	alloc_power = MAX(1, (ap * 10) / 11);
+	alloc_power = MAX(1, (ap * 20) / 23);
 
 	/* Set rarity based on power */
 	alloc_new = 4000000 / (alloc_power * alloc_power);
