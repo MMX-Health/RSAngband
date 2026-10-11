@@ -1262,6 +1262,19 @@ static void adjust_freqs(struct artifact_set_data *data)
 	/* Cut aggravation frequencies in half since they're used twice */
 	data->art_probs[ART_IDX_NONWEAPON_AGGR] /= 2;
 	data->art_probs[ART_IDX_WEAPON_AGGR] /= 2;
+
+	/*
+	 * Double all supercharge frequencies so randarts reach their
+	 * (boosted) target power through supercharges more often rather
+	 * than through stacking high-power fillers such as immunities.
+	 */
+	data->art_probs[ART_IDX_MELEE_DICE_SUPER] *= 2;
+	data->art_probs[ART_IDX_MELEE_BLOWS_SUPER] *= 2;
+	data->art_probs[ART_IDX_MELEE_AC_SUPER] *= 2;
+	data->art_probs[ART_IDX_BOW_SHOTS_SUPER] *= 2;
+	data->art_probs[ART_IDX_BOW_MIGHT_SUPER] *= 2;
+	data->art_probs[ART_IDX_GEN_SPEED_SUPER] *= 2;
+	data->art_probs[ART_IDX_GEN_AC_SUPER] *= 2;
 }
 
 /**
